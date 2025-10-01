@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Digital - Bíblia Em Contos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        .product-card { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .sidebar { transition: transform 0.3s ease-in-out; }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col">
+    <div id="app-wrapper" class="h-full flex flex-col">
+        <!-- CABEÇALHO -->
+        <header class="bg-white shadow-md z-30">
+            <div class="px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-8 h-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25a2.25 2.25 0 002.25-2.25v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25v2.25A2.25 2.25 0 006 20.25z" />
+                        </svg>
+                        <span class="text-xl font-bold text-gray-800">Catálogo Digital</span>
+                    </div>
+                    <div class="md:hidden">
+                        <button id="menu-toggle-btn" class="p-2">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div id="app-container" class="flex flex-1 overflow-hidden">
+            <!-- Barra Lateral -->
+            <aside id="sidebar" class="sidebar fixed top-16 left-0 h-[calc(100%-4rem)] w-64 bg-gray-800 text-white p-6 flex flex-col z-20 md:relative md:top-auto md:h-full md:transform-none">
+                <h1 class="text-2xl font-bold mb-8 text-center">Catálogo</h1>
+                <nav id="customer-nav" class="flex-grow">
+                    <h2 class="text-lg font-semibold mb-3 text-gray-400">Categorias</h2>
+                    <ul id="category-list" class="space-y-2">
+                        <li><a href="#" class="block py-2 px-3 rounded hover:bg-gray-700 category-filter" data-category="Todos">Todos</a></li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <!-- Conteúdo Principal -->
+            <main class="flex-1 flex flex-col overflow-hidden">
+                <div id="content-area" class="flex-1 p-6 lg:p-10 overflow-y-auto">
+                    <!-- Visão do Cliente -->
+                    <div id="customer-view">
+                        <h2 id="current-category-title" class="text-3xl font-bold text-gray-800 mb-8">Todos os Produtos</h2>
+                        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+                    </div>
+                </div>
+            </main>
+            <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-10 hidden md:hidden"></div>
+        </div>
+
+         <!-- RODAPÉ -->
+        <footer class="bg-gray-800 text-white">
+            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 text-center text-sm">
+                &copy; 2025 Bíblia Em Contos. Todos os direitos reservados.
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal Detalhes do Produto -->
+    <div id="product-detail-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row transform transition-all">
+            <div class="w-full md:w-1/2">
+                <img id="modal-product-image" src="" alt="Imagem do produto" class="w-full h-64 md:h-full object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none" onerror="this.onerror=null;this.src='https://placehold.co/600x600/e2e8f0/adb5bd?text=Imagem';">
+            </div>
+            <div class="w-full md:w-1/2 p-6 flex flex-col relative">
+                <button id="close-detail-modal-btn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+                <h3 id="modal-product-name" class="text-3xl font-bold text-gray-900 mb-2">Nome do Produto</h3>
+                <p id="modal-product-category" class="text-sm text-gray-500 bg-gray-100 rounded-full px-3 py-1 self-start mb-4">Categoria</p>
+                <div class="flex items-end space-x-3 mb-4">
+                    <p id="modal-product-price" class="text-4xl font-light text-indigo-600">R$ 0,00</p>
+                    <p id="modal-product-old-price" class="text-2xl text-gray-400 line-through hidden"></p>
+                </div>
+                <div class="flex-grow overflow-y-auto pr-2">
+                    <h4 class="font-semibold text-gray-800 mb-2">Descrição</h4>
+                    <div id="modal-product-description" class="text-gray-600 leading-relaxed"></div>
+                </div>
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <a id="modal-buy-button" href="#" target="_blank" class="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg text-lg transition duration-300">Comprar Agora</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCeLaXseheDFXsnXV7WyFkj6PkoTjkhWF0",
+            authDomain: "meu-catalogo-digital-e130c.firebaseapp.com",
+            projectId: "meu-catalogo-digital-e130c",
+            storageBucket: "meu-catalogo-digital-e130c.appspot.com",
+            messagingSenderId: "850408761488",
+            appId: "1:850408761488:web:4486ab68a5571c0886d015"
+        };
+        const appId = 'digital-product-manager';
+        
+        let app, db;
+        let unsubscribePublic;
+        
+        let state = { publicProducts: [], categories: [], filterCategory: 'Todos' };
+
+        const productGrid = document.getElementById('product-grid');
+        const categoryList = document.getElementById('category-list');
+        const currentCategoryTitle = document.getElementById('current-category-title');
+        const detailModal = document.getElementById('product-detail-modal');
+        const closeDetailModalBtn = document.getElementById('close-detail-modal-btn');
+        const menuToggleBtn = document.getElementById('menu-toggle-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        
+        function init() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                setupGeneralListeners();
+                attachFirestoreListener();
+            } catch (e) { console.error("Erro na inicialização do Firebase:", e); }
+        }
+
+        function attachFirestoreListener() {
+            const publicCollectionRef = collection(db, `/artifacts/${appId}/public/data/products`);
+            if (unsubscribePublic) unsubscribePublic();
+            unsubscribePublic = onSnapshot(publicCollectionRef, (snapshot) => {
+                state.publicProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                render();
+            });
+        }
+
+        function setupGeneralListeners() {
+            categoryList.addEventListener('click', e => {
+                if (e.target.classList.contains('category-filter')) {
+                    e.preventDefault();
+                    state.filterCategory = e.target.dataset.category;
+                    currentCategoryTitle.textContent = `${state.filterCategory} ${state.filterCategory === 'Todos' ? 'os Produtos' : ''}`;
+                    render();
+                    if (window.innerWidth < 768) {
+                        sidebar.classList.remove('open');
+                        sidebarOverlay.classList.add('hidden');
+                    }
+                }
+            });
+            
+            productGrid.addEventListener('click', (e) => {
+                const card = e.target.closest('.product-card');
+                if(card) {
+                    const productId = card.dataset.id;
+                    const product = state.publicProducts.find(p => p.id === productId);
+                    if(product) showProductDetailModal(product);
+                }
+            });
+
+            closeDetailModalBtn.addEventListener('click', closeProductDetailModal);
+            detailModal.addEventListener('click', (e) => { if (e.target.id === 'product-detail-modal') closeProductDetailModal(); });
+
+            menuToggleBtn.addEventListener('click', () => {
+                sidebar.classList.add('open');
+                sidebarOverlay.classList.remove('hidden');
+            });
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.add('hidden');
+            });
+        }
+        
+        function render() {
+            renderCategories();
+            renderCustomerView();
+        }
+
+        function renderCustomerView() {
+            const productsToDisplay = state.filterCategory === 'Todos' ? state.publicProducts : state.publicProducts.filter(p => p.category === state.filterCategory);
+            productGrid.innerHTML = '';
+            if (productsToDisplay.length === 0) {
+                 productGrid.innerHTML = `<p class="text-gray-500 col-span-full">Nenhum produto encontrado nesta categoria.</p>`;
+                 return;
+            }
+            productsToDisplay.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer';
+                card.dataset.id = product.id; 
+
+                let priceHTML = `<p class="text-xl font-semibold text-indigo-600 mt-3">R$ ${Number(product.price).toFixed(2).replace('.', ',')}</p>`;
+                if (product.oldPrice && product.oldPrice > product.price) {
+                    priceHTML = `
+                        <div class="flex items-baseline space-x-2 mt-3">
+                            <p class="text-gray-500 line-through">R$ ${Number(product.oldPrice).toFixed(2).replace('.', ',')}</p>
+                            <p class="text-xl font-semibold text-indigo-600">R$ ${Number(product.price).toFixed(2).replace('.', ',')}</p>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `<img src="${product.imageUrl}" alt="${product.name}" class="w-full h-48 object-cover pointer-events-none" onerror="this.onerror=null;this.src='https://placehold.co/400x300/e2e8f0/adb5bd?text=Imagem+Indisponível';"><div class="p-4 pointer-events-none"><h3 class="text-lg font-bold text-gray-800">${product.name}</h3><p class="text-sm text-gray-500 mt-1">${product.category}</p><p class="text-gray-700 mt-2 truncate">${product.description}</p>${priceHTML}</div>`;
+                productGrid.appendChild(card);
+            });
+        }
+
+        function renderCategories() {
+            const uniqueCategories = ['Todos', ...new Set(state.publicProducts.map(p => p.category))];
+            state.categories = uniqueCategories;
+            categoryList.innerHTML = `<li><a href="#" class="block py-2 px-3 rounded hover:bg-gray-700 category-filter" data-category="Todos">Todos</a></li>`;
+            state.categories.slice(1).forEach(category => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="#" class="block py-2 px-3 rounded hover:bg-gray-700 category-filter" data-category="${category}">${category}</a>`;
+                categoryList.appendChild(li);
+            });
+            document.querySelectorAll('.category-filter').forEach(el => {
+                el.classList.toggle('bg-gray-900', el.dataset.category === state.filterCategory);
+                el.classList.toggle('font-bold', el.dataset.category === state.filterCategory);
+            });
+        }
+        
+        function showProductDetailModal(product) {
+            document.getElementById('modal-product-image').src = product.imageUrl;
+            document.getElementById('modal-product-name').textContent = product.name;
+            document.getElementById('modal-product-category').textContent = product.category;
+            document.getElementById('modal-product-price').textContent = `R$ ${Number(product.price).toFixed(2).replace('.', ',')}`;
+            document.getElementById('modal-buy-button').href = product.buyLink;
+            
+            const oldPriceEl = document.getElementById('modal-product-old-price');
+            if (product.oldPrice && product.oldPrice > product.price) {
+                oldPriceEl.textContent = `R$ ${Number(product.oldPrice).toFixed(2).replace('.', ',')}`;
+                oldPriceEl.classList.remove('hidden');
+            } else {
+                oldPriceEl.classList.add('hidden');
+            }
+            
+            const descriptionContainer = document.getElementById('modal-product-description');
+            descriptionContainer.innerHTML = ''; 
+            
+            if (product.description) {
+                const paragraphs = product.description.split('\n').filter(p => p.trim() !== '');
+                paragraphs.forEach(pText => {
+                    const pElement = document.createElement('p');
+                    pElement.textContent = pText;
+                    pElement.className = 'mb-3';
+                    descriptionContainer.appendChild(pElement);
+                });
+            }
+            
+            detailModal.classList.remove('hidden');
+        }
+
+        function closeProductDetailModal() { detailModal.classList.add('hidden'); }
+
+        init();
+    </script>
+</body>
+</html>
+
