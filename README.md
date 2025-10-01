@@ -57,7 +57,7 @@ Para testar este projeto no seu próprio ambiente, siga os passos:
 
 Clone o repositório:
 
-git clone [https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git](https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git)
+git clone [https://github.com/Dev-Jardel/catalogo-digital](https://github.com/Dev-Jardel/catalogo-digital.git)
 
 Configure suas chaves do Firebase:
 
